@@ -1,17 +1,22 @@
 package com.tecsup.blinkcare.core.network
+import com.tecsup.blinkcare.blink.domain.model.Dispositivo
 import retrofit2.Response
 import retrofit2.http.*
 
 interface ApiService {
-    @GET("devices")
-    suspend fun getDevices(): Response<List<DeviceDto>>
 
-    @POST("devices")
-    suspend fun addDevice(@Body device: DeviceDto): Response<DeviceDto>
+    @GET("dispositivos")
+    suspend fun getDispositivos(): List<Dispositivo>
 
-    @PUT("devices/{id}")
-    suspend fun updateDevice(@Path("id") id: Int, @Body device: DeviceDto): Response<DeviceDto>
+    @POST("dispositivos")
+    suspend fun addDispositivo(@Body dispositivo: Dispositivo): Response<Unit>
 
-    @DELETE("devices/{id}")
-    suspend fun deleteDevice(@Path("id") id: Int): Response<Unit>
+    @PUT("dispositivos/{id}")
+    suspend fun updateDispositivo(
+        @Path("id") id: Int,
+        @Body dispositivo: Dispositivo
+    ): Response<Unit>
+
+    @DELETE("dispositivos/{id}")
+    suspend fun deleteDispositivo(@Path("id") id: Int): Response<Unit>
 }
