@@ -40,6 +40,9 @@ android {
         compose = true
     }
 }
+val retrofit_version = "2.9.0"
+val okhttp_version = "4.12.0"
+val gson_version = "2.10.1"
 
 dependencies {
     // Hilt
@@ -54,6 +57,17 @@ dependencies {
 
     // Hilt Navigation Compose
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    // Retrofit y convertidor GSON
+    implementation("com.squareup.retrofit2:retrofit:$retrofit_version")
+    implementation("com.squareup.retrofit2:converter-gson:$retrofit_version")
+
+    // OkHttp para logging y conexión
+    implementation("com.squareup.okhttp3:okhttp:$okhttp_version")
+    implementation("com.squareup.okhttp3:logging-interceptor:$okhttp_version")
+
+    // GSON (opcional si ya usas converter-gson)
+    implementation("com.google.code.gson:gson:$gson_version")
 
     // Otras dependencias necesarias
     implementation("androidx.core:core-ktx:1.12.0")
