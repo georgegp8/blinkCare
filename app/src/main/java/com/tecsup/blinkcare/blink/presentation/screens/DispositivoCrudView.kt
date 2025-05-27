@@ -1,5 +1,7 @@
 package com.tecsup.blinkcare.blink.presentation.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,9 +18,12 @@ import com.tecsup.blinkcare.blink.presentation.viewmodel.DispositivosViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DispositivoCrudView() {
@@ -126,6 +131,7 @@ fun DispositivoCrudView() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DispositivoCard(
     dispositivo: Dispositivo,
@@ -150,12 +156,10 @@ fun DispositivoCard(
 
             val fechaFormateada = dispositivo.lastSeen?.let {
                 try {
-                    val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'", Locale.getDefault())
-                    parser.timeZone = TimeZone.getTimeZone("UTC")
-                    val fecha = parser.parse(it)
-                    val salida = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
-                    salida.format(fecha!!)
-                } catch (e: Exception) {
+                    val fecha = OffsetDateTime.parse(it) // reconoce la zona -05:00
+                    val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+                    fecha.format(formatter)
+                } catch (_: Exception) {
                     "Fecha no válida"
                 }
             } ?: "Sin registro"

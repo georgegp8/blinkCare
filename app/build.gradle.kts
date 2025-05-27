@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")
-    id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -45,18 +45,6 @@ val okhttp_version = "4.12.0"
 val gson_version = "2.10.1"
 
 dependencies {
-    // Hilt
-    implementation("com.google.dagger:hilt-android:2.56.2")
-    kapt("com.google.dagger:hilt-compiler:2.56.2")
-
-    // Hilt para pruebas
-    testImplementation("com.google.dagger:hilt-android-testing:2.56.2")
-    kaptTest("com.google.dagger:hilt-compiler:2.56.2")
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.56.2")
-    kaptAndroidTest("com.google.dagger:hilt-compiler:2.56.2")
-
-    // Hilt Navigation Compose
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // Retrofit y convertidor GSON
     implementation("com.squareup.retrofit2:retrofit:$retrofit_version")
@@ -81,6 +69,16 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.5.1")
     implementation("androidx.compose.ui:ui-tooling:1.5.1")
     implementation("androidx.compose.ui:ui-test-manifest:1.5.1")
+
+    //Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.firebaseui:firebase-ui-auth:9.0.0")
+    implementation("com.facebook.android:facebook-android-sdk:8.x")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
