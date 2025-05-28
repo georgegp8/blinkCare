@@ -5,17 +5,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.material3.MaterialTheme
 import androidx.navigation.compose.rememberNavController
 import com.tecsup.blinkcare.ui.navigation.AppNavigation
+import com.tecsup.blinkcare.ui.theme.BlinkCareTheme
 
 class MainActivity : ComponentActivity() {
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val navController = rememberNavController()
-            MaterialTheme {
+            BlinkCareTheme {
+                val navController = rememberNavController()
                 AppNavigation()
             }
         }

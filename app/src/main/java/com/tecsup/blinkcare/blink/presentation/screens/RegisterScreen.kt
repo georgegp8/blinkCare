@@ -24,13 +24,13 @@ import com.tecsup.blinkcare.blink.presentation.viewmodel.AuthViewModelFactory
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 @Composable
-fun LoginGoogleScreen(
+fun RegisterScreen(
     navController: NavController,
-    onLoginSuccess: () -> Unit,
+    onRegisterSuccess: () -> Unit
 ) {
     val context = LocalContext.current
     LaunchedEffect(Unit) {
-        Log.d("LoginGoogleScreen", "Context type: ${context.javaClass.simpleName}")
+        Log.d("RegisterScreen", "Context type: ${context.javaClass.simpleName}")
     }
 
     if (context !is Activity) {
@@ -41,7 +41,7 @@ fun LoginGoogleScreen(
                 .fillMaxSize()
                 .wrapContentSize(Alignment.Center)
         )
-        Log.e("LoginGoogleScreen", "Context is not an Activity: ${context.javaClass.simpleName}")
+        Log.e("RegisterScreen", "Context is not an Activity: ${context.javaClass.simpleName}")
         return
     }
 
@@ -54,10 +54,11 @@ fun LoginGoogleScreen(
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
 
     LaunchedEffect(userIdToken) {
         if (userIdToken != null) {
-            onLoginSuccess()
+            onRegisterSuccess()
         }
     }
 
@@ -69,7 +70,7 @@ fun LoginGoogleScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Iniciar Sesión",
+            text = "Crear Cuenta",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.primary
         )
@@ -78,7 +79,7 @@ fun LoginGoogleScreen(
         if (loading) {
             CircularProgressIndicator()
             Spacer(Modifier.height(16.dp))
-            Text("Iniciando sesión...")
+            Text("Registrando...")
         } else {
             errorMessage?.let {
                 Text(
@@ -119,42 +120,49 @@ fun LoginGoogleScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
+
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                label = { Text("Confirmar contraseña") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = null
+                    )
+                },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(bottom = 16.dp)
             )
 
             Button(
-                onClick = { authViewModel.signInWithEmail(email, password) },
+                onClick = {
+                    if (password == confirmPassword) {
+                        authViewModel.registerWithEmail(email, password)
+                    } else {
+                        authViewModel.errorMessage.value = "Las contraseñas no coinciden"
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
                 shape = MaterialTheme.shapes.medium
             ) {
-                Text("Iniciar sesión")
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            Button(
-                onClick = { authViewModel.signInWithGoogle() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                shape = MaterialTheme.shapes.medium,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-            ) {
-                Text("Iniciar sesión con Google")
+                Text("Registrarse")
             }
 
             Spacer(Modifier.height(16.dp))
 
             TextButton(
-                onClick = { navController.navigate("register") }
+                onClick = { navController.navigate("login") }
             ) {
                 Text(
-                    text = "¿No tienes cuenta? Regístrate",
+                    text = "¿Ya tienes cuenta? Inicia sesión",
                     color = MaterialTheme.colorScheme.primary
                 )
             }
