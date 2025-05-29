@@ -74,7 +74,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     //Serial
-    implementation ("com.hoho.android:usb-serial-for-android:3.4.6")
+    implementation ("com.github.mik3y:usb-serial-for-android:3.9.0")
 
     // Core
     implementation("androidx.core:core-ktx:1.12.0")

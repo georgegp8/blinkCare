@@ -1,13 +1,11 @@
 package com.tecsup.blinkcare.blink.presentation.screens
 
 import android.app.Activity
+import android.hardware.usb.UsbManager
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,7 +16,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -27,18 +24,19 @@ import com.tecsup.blinkcare.blink.domain.model.Dispositivo
 import com.tecsup.blinkcare.blink.presentation.viewmodel.AuthViewModel
 import com.tecsup.blinkcare.blink.presentation.viewmodel.AuthViewModelFactory
 import com.tecsup.blinkcare.blink.presentation.viewmodel.DispositivosViewModel
-import com.tecsup.blinkcare.blink.presentation.viewmodel.ParpadeoViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
+import java.util.*
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DispositivoCrudView() {
     val context = LocalContext.current
+    val usbManager = context.getSystemService(UsbManager::class.java)
     if (context !is Activity) {
         Text(
             text = "Error: Contexto no es una Activity",
@@ -52,25 +50,17 @@ fun DispositivoCrudView() {
     val dispositivosViewModel: DispositivosViewModel = viewModel()
 
     val dispositivos by dispositivosViewModel.dispositivos.collectAsState()
-    val isLoading by dispositivosViewModel.isLoading
-    val authErrorMessage by authViewModel.errorMessage
+    val isLoading by dispositivosViewModel.isLoading.collectAsState()
+    val blinkCount by dispositivosViewModel.blinkCount.collectAsState(initial = 0)
+    val showAlert by dispositivosViewModel.showAlert.collectAsState(initial = false)
+
 
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
-    // Carga inicial
     LaunchedEffect(Unit) {
         dispositivosViewModel.obtenerDispositivos()
-    }
-
-    // Mostrar errores
-    LaunchedEffect(authErrorMessage) {
-        authErrorMessage?.let {
-            coroutineScope.launch {
-                snackbarHostState.showSnackbar(it)
-            }
-            authViewModel.errorMessage.value = null
-        }
+        dispositivosViewModel.iniciarLecturaUSB(usbManager)
     }
 
     Scaffold(
@@ -100,21 +90,32 @@ fun DispositivoCrudView() {
             )
         }
     ) { padding ->
-        Box(
-            modifier = Modifier.padding(padding).fillMaxSize(),
-            contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
+            if (showAlert) {
+                Text(
+                    text = "¡ALERTA: Parpadeo insuficiente!",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+
+            Text(
+                text = "Parpadeos por minuto: $blinkCount",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
+            )
+
             when {
                 isLoading -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("Cargando dispositivos...", style = MaterialTheme.typography.bodyLarge)
-
-                    }
+                    CircularProgressIndicator(modifier = Modifier.padding(32.dp))
                 }
 
                 dispositivos.isEmpty() -> {
@@ -162,7 +163,7 @@ fun DispositivoCard(
             MaterialTheme.colorScheme.tertiaryContainer
         else
             MaterialTheme.colorScheme.surfaceVariant,
-        animationSpec = tween(durationMillis = 1000, delayMillis = 150) // ← MÁS LENTO
+        animationSpec = tween(durationMillis = 1000)
     )
 
     Card(
@@ -220,31 +221,6 @@ fun DispositivoCard(
                     Text("Eliminar")
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun ContadorParpadeosView(viewModel: ParpadeoViewModel = viewModel()) {
-    val data = viewModel.parpadeoData
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("Conteo de Parpadeos", style = MaterialTheme.typography.headlineSmall)
-        Spacer(Modifier.height(8.dp))
-        Text("${data.conteo}", style = MaterialTheme.typography.displayLarge)
-
-        if (data.alerta) {
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = "¡Alerta! Parpadeos insuficientes",
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyLarge
-            )
         }
     }
 }

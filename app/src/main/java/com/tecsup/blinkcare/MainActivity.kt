@@ -5,8 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.navigation.compose.rememberNavController
-import com.tecsup.blinkcare.ui.navigation.AppNavigation
+import com.tecsup.blinkcare.ui.navigation.MainScaffold
 import com.tecsup.blinkcare.ui.theme.BlinkCareTheme
 
 class MainActivity : ComponentActivity() {
@@ -15,8 +14,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             BlinkCareTheme {
-                val navController = rememberNavController()
-                AppNavigation()
+                MainScaffold()
             }
         }
     }
