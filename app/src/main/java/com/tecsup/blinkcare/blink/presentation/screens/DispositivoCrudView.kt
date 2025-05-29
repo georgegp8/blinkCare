@@ -1,6 +1,5 @@
 package com.tecsup.blinkcare.blink.presentation.screens
 
-import android.app.Activity
 import android.hardware.usb.UsbManager
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,73 +19,46 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tecsup.blinkcare.blink.domain.model.Dispositivo
-import com.tecsup.blinkcare.blink.presentation.viewmodel.AuthViewModel
-import com.tecsup.blinkcare.blink.presentation.viewmodel.AuthViewModelFactory
 import com.tecsup.blinkcare.blink.presentation.viewmodel.DispositivosViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-
+import com.tecsup.blinkcare.R
 
 @RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DispositivoCrudView() {
     val context = LocalContext.current
     val usbManager = context.getSystemService(UsbManager::class.java)
-    if (context !is Activity) {
-        Text(
-            text = "Error: Contexto no es una Activity",
-            color = MaterialTheme.colorScheme.error,
-            modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center)
-        )
-        return
-    }
 
-    val authViewModel: AuthViewModel = viewModel(factory = AuthViewModelFactory(context))
-    val dispositivosViewModel: DispositivosViewModel = viewModel()
-
-    val dispositivos by dispositivosViewModel.dispositivos.collectAsState()
-    val isLoading by dispositivosViewModel.isLoading.collectAsState()
-    val blinkCount by dispositivosViewModel.blinkCount.collectAsState(initial = 0)
-    val showAlert by dispositivosViewModel.showAlert.collectAsState(initial = false)
-
+    val viewModel: DispositivosViewModel = viewModel()
+    val dispositivos by viewModel.dispositivos.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val blinkCount by viewModel.blinkCount.collectAsState()
+    val showAlert by viewModel.showAlert.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        dispositivosViewModel.obtenerDispositivos()
-        dispositivosViewModel.iniciarLecturaUSB(usbManager)
+        viewModel.obtenerDispositivos()
+        viewModel.iniciarLecturaUSB(usbManager)
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Dispositivos ESP32") },
-                actions = {
-                    IconButton(onClick = {
-                        coroutineScope.launch {
-                            dispositivosViewModel.obtenerDispositivos()
-                        }
-                    }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refrescar")
-                    }
-                    IconButton(onClick = {
-                        authViewModel.logout()
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Cerrar sesión")
-                    }
+        floatingActionButton = {
+            FloatingActionButton(onClick = {
+                coroutineScope.launch {
+                    viewModel.obtenerDispositivos()
                 }
-            )
+            }) {
+                Icon(Icons.Default.Refresh, contentDescription = "Refrescar dispositivos")
+            }
         },
         snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
-            )
+            SnackbarHost(snackbarHostState)
         }
     ) { padding ->
         Column(
@@ -99,48 +70,41 @@ fun DispositivoCrudView() {
         ) {
             if (showAlert) {
                 Text(
-                    text = "¡ALERTA: Parpadeo insuficiente!",
-                    style = MaterialTheme.typography.bodyLarge,
+                    "¡ALERTA: Parpadeo insuficiente!",
                     color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(16.dp)
                 )
             }
 
             Text(
-                text = "Parpadeos por minuto: $blinkCount",
+                "Parpadeos por minuto: $blinkCount",
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
+                modifier = Modifier.padding(16.dp)
             )
 
             when {
-                isLoading -> {
-                    CircularProgressIndicator(modifier = Modifier.padding(32.dp))
-                }
+                isLoading -> CircularProgressIndicator(modifier = Modifier.padding(32.dp))
 
-                dispositivos.isEmpty() -> {
-                    Text(
-                        text = "No hay dispositivos disponibles",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
+                dispositivos.isEmpty() -> Text(
+                    "No hay dispositivos disponibles",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(16.dp)
+                )
 
-                else -> {
-                    LazyColumn(
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        items(dispositivos) { dispositivo ->
-                            DispositivoCard(
-                                dispositivo = dispositivo,
-                                viewModel = dispositivosViewModel,
-                                snackbarHostState = snackbarHostState,
-                                coroutineScope = coroutineScope
-                            )
-                        }
+                else -> LazyColumn(
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    items(dispositivos) { dispositivo ->
+                        DispositivoCard(
+                            dispositivo = dispositivo,
+                            viewModel = viewModel,
+                            snackbarHostState = snackbarHostState,
+                            coroutineScope = coroutineScope
+                        )
                     }
                 }
             }
@@ -159,11 +123,9 @@ fun DispositivoCard(
     var conectadoLocal by remember { mutableStateOf(dispositivo.conectado) }
 
     val cardColor by animateColorAsState(
-        targetValue = if (conectadoLocal)
-            MaterialTheme.colorScheme.tertiaryContainer
-        else
-            MaterialTheme.colorScheme.surfaceVariant,
-        animationSpec = tween(durationMillis = 1000)
+        targetValue = if (conectadoLocal) MaterialTheme.colorScheme.tertiaryContainer
+        else MaterialTheme.colorScheme.surfaceVariant,
+        animationSpec = tween(1000)
     )
 
     Card(

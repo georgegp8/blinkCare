@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
 import com.hoho.android.usbserial.util.SerialInputOutputManager
+import com.tecsup.blinkcare.blink.data.repository.FirebaseBlinkRepository
 import com.tecsup.blinkcare.blink.domain.model.Dispositivo
 import com.tecsup.blinkcare.core.network.RetrofitClient
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +26,24 @@ class DispositivosViewModel : ViewModel() {
     val isLoading = MutableStateFlow(true)
     val blinkCount = MutableStateFlow(0)
     val showAlert = MutableStateFlow(false)
+
+    private val firebaseRepo = FirebaseBlinkRepository()
+
+    init {
+        // Escuchar los datos en tiempo real desde Firebase Realtime Database
+        firebaseRepo.listenBlinkData(
+            onBlinkCountChanged = { count ->
+                viewModelScope.launch {
+                    blinkCount.value = count
+                }
+            },
+            onAlertChanged = { alert ->
+                viewModelScope.launch {
+                    showAlert.value = alert
+                }
+            }
+        )
+    }
 
     fun obtenerDispositivos() {
         viewModelScope.launch {
@@ -112,7 +131,4 @@ class DispositivosViewModel : ViewModel() {
             }
         }
     }
-
 }
-
-

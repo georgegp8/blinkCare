@@ -60,6 +60,7 @@ dependencies {
     implementation("androidx.credentials:credentials:1.2.2")
     implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation ("com.google.firebase:firebase-database-ktx:21.0.0")
 
     // Compose
     implementation(platform("androidx.compose:compose-bom:2024.10.00"))
