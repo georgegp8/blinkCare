@@ -58,7 +58,7 @@ dependencies {
 
     // Credential Manager
     implementation("androidx.credentials:credentials:1.2.2")
-    implementation("androidx.credentials:credentials-play-services-auth:1.2.2") // Usa versión estable
+    implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     // Compose
@@ -72,6 +72,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.6")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    //Serial
+    implementation ("com.hoho.android:usb-serial-for-android:3.4.6")
 
     // Core
     implementation("androidx.core:core-ktx:1.12.0")

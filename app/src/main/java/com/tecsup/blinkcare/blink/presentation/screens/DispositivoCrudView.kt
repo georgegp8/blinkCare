@@ -27,6 +27,7 @@ import com.tecsup.blinkcare.blink.domain.model.Dispositivo
 import com.tecsup.blinkcare.blink.presentation.viewmodel.AuthViewModel
 import com.tecsup.blinkcare.blink.presentation.viewmodel.AuthViewModelFactory
 import com.tecsup.blinkcare.blink.presentation.viewmodel.DispositivosViewModel
+import com.tecsup.blinkcare.blink.presentation.viewmodel.ParpadeoViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
@@ -219,6 +220,31 @@ fun DispositivoCard(
                     Text("Eliminar")
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ContadorParpadeosView(viewModel: ParpadeoViewModel = viewModel()) {
+    val data = viewModel.parpadeoData
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Conteo de Parpadeos", style = MaterialTheme.typography.headlineSmall)
+        Spacer(Modifier.height(8.dp))
+        Text("${data.conteo}", style = MaterialTheme.typography.displayLarge)
+
+        if (data.alerta) {
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = "¡Alerta! Parpadeos insuficientes",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
     }
 }
